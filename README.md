@@ -14,7 +14,7 @@ Add this to your vyos-modular config
 modules:
   - type: git
     url: https://github.com/ramblurr/vyos-module-mft.git
-    version: main
+    version: saggita
 ```
 
 
