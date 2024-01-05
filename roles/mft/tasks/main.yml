@@ -1,0 +1,31 @@
+- name: Download MFT packages
+  ansible.builtin.get_url:
+    url: "https://www.mellanox.com/downloads/MFT/mft-{{ mft_version }}-x86_64-deb.tgz"
+    dest: "/tmp/mft-deb.tgz"
+    mode: '0644'
+
+- name: Extract MFT deb
+  command: tar -zxvf /tmp/mft-deb.tgz
+  args:
+    chdir: "/tmp"
+
+- name: Create temporary directory in chroot for MFT debs
+  ansible.builtin.file:
+    path: "{{ vyos_install_root }}/tmp/mft"
+    state: directory
+
+- name: Move MFT debs to chroot environment to install
+  command: "/bin/bash -c 'mv /tmp/mft-{{ mft_version }}-x86_64-deb/DEBS/*.deb {{ vyos_install_root }}/tmp/mft'"
+
+- name: Remove the unused mft-pcap package
+  ansible.builtin.file:
+    path: "{{ vyos_install_root }}/tmp/mft/mft-pcap_{{ mft_version }}_amd64.deb"
+    state: absent
+
+- name: Install MFT debs
+  command: "chroot {{ vyos_install_root }} /bin/bash -c 'dpkg -i /tmp/mft/*.deb'"
+
+- name: Delete temporary MFT deb directory
+  file:
+    path: "{{ vyos_install_root }}/tmp/mft"
+    state: absent
